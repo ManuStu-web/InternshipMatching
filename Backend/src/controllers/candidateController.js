@@ -1,10 +1,13 @@
 const Candidate = require("../models/Candidate");
 const CandidateAuth = require("../models/CandidateAuth");
+const Allocation = require("../models/Allocation");
+const Internship = require("../models/Internship");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
+const { calculateMatchScore } = require("../services/matchingService");
 
 //registration
 const registerCandidate = async (req, res) => {
@@ -127,6 +130,61 @@ const getMyProfile = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch profile",
+      error: error.message,
+    });
+  }
+};
+
+const getMyAllocations = async (req, res) => {
+  try {
+    const allocations = await Allocation.find({ candidate: req.user.id })
+      .populate("internship", "title organization location role sector availableSeats totalSeats")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: "Candidate allocations fetched successfully",
+      count: allocations.length,
+      allocations,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch allocations",
+      error: error.message,
+    });
+  }
+};
+
+const getMyRecommendations = async (req, res) => {
+  try {
+    const candidate = await Candidate.findById(req.user.id);
+
+    if (!candidate) {
+      return res.status(404).json({
+        message: "Candidate profile not found",
+      });
+    }
+
+    const internships = await Internship.find({ status: { $ne: "closed" } });
+
+    const recommendations = internships
+      .map((internship) => {
+        const result = calculateMatchScore(candidate, internship);
+        return {
+          internship,
+          score: result.totalScore,
+          breakdown: result.breakdown,
+        };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    res.status(200).json({
+      message: "Recommendations fetched successfully",
+      count: recommendations.length,
+      recommendations,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch recommendations",
       error: error.message,
     });
   }
@@ -276,8 +334,10 @@ const uploadResume = async (req, res) => {
     formData.append("file", fs.createReadStream(req.file.path));
 
     // Send resume to Python parser
+    const parserBaseUrl = process.env.PARSER_BASE_URL || "http://localhost:8000";
+
     const parserResponse = await axios.post(
-      "http://localhost:8000/parse-resume",
+      `${parserBaseUrl}/parse-resume`,
       formData,
       {
         headers: {
@@ -329,6 +389,8 @@ module.exports = {
   registerCandidate,
   getCandidates,
   getMyProfile,
+  getMyAllocations,
+  getMyRecommendations,
   loginCandidate,
   updateMyProfile,
   uploadResume,
