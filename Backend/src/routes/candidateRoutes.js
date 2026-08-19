@@ -1,5 +1,8 @@
 const express = require("express");
 const upload = require("../middleware/uploadMiddleware");
+const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
+
 const {
   registerCandidate,
   getCandidates,
@@ -7,16 +10,20 @@ const {
   loginCandidate,
   updateMyProfile,
   uploadResume,
+  getMyAllocations,
+  getMyRecommendations,
 } = require("../controllers/candidateController");
-const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 router.post("/register", registerCandidate);
-router.get("/", getCandidates);
 router.post("/login", loginCandidate);
-router.get("/me", authMiddleware, getMyProfile);
-router.put("/me", authMiddleware, updateMyProfile);
-router.post("/resume", authMiddleware, upload.single("resume"), uploadResume);
+router.get("/", authMiddleware, roleMiddleware("admin", "officer"), getCandidates);
+
+router.get("/me", authMiddleware, roleMiddleware("candidate"), getMyProfile);
+router.put("/me", authMiddleware, roleMiddleware("candidate"), updateMyProfile);
+router.post("/resume", authMiddleware, roleMiddleware("candidate"), upload.single("resume"), uploadResume);
+router.get("/me/allocations", authMiddleware, roleMiddleware("candidate"), getMyAllocations);
+router.get("/me/recommendations", authMiddleware, roleMiddleware("candidate"), getMyRecommendations);
 
 module.exports = router;
