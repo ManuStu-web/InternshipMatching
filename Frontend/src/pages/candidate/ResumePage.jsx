@@ -64,7 +64,11 @@ export default function ResumePage() {
       const response = await uploadResume(formData);
       const result = response.candidate || profile;
       setProfile(result);
-      setSuccess('Resume uploaded successfully.');
+      setSuccess(
+        response.parsingStatus === 'completed'
+          ? 'Resume uploaded and analyzed successfully.'
+          : 'Resume uploaded successfully. Resume parsing is temporarily unavailable, so detected details may not update yet.',
+      );
       setSelectedFile(null);
       if (inputRef.current) inputRef.current.value = '';
     } catch (uploadError) {

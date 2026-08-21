@@ -113,6 +113,43 @@ const getCandidates = async (req, res) => {
   }
 };
 
+const getCandidateById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(404).json({
+        message: "Candidate not found",
+      });
+    }
+
+    const candidate = await Candidate.findById(id).select(
+      "-password -passwordHash -token -jwt -secret",
+    );
+
+    if (!candidate) {
+      return res.status(404).json({
+        message: "Candidate not found",
+      });
+    }
+
+    const allocations = await Allocation.find({ candidate: candidate._id })
+      .populate("internship", "title organization location role sector")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: "Candidate details fetched successfully",
+      candidate,
+      allocations,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch candidate details",
+      error: error.message,
+    });
+  }
+};
+
 const getMyProfile = async (req, res) => {
   try {
     const candidate = await Candidate.findById(req.user.id);
@@ -328,43 +365,56 @@ const uploadResume = async (req, res) => {
 
     await candidate.save();
 
-    // Create form data for Python API
-    const formData = new FormData();
+    let parsingStatus = "skipped";
 
-    formData.append("file", fs.createReadStream(req.file.path));
+    try {
+      // Create form data for Python API
+      const formData = new FormData();
 
-    // Send resume to Python parser
-    const parserBaseUrl = process.env.PARSER_BASE_URL || "http://localhost:8000";
+      formData.append("file", fs.createReadStream(req.file.path));
 
-    const parserResponse = await axios.post(
-      `${parserBaseUrl}/parse-resume`,
-      formData,
-      {
-        headers: {
-          ...formData.getHeaders(),
+      // Send resume to Python parser
+      const parserBaseUrl = process.env.PARSER_BASE_URL || "http://localhost:8000";
+
+      const parserResponse = await axios.post(
+        `${parserBaseUrl}/parse-resume`,
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders(),
+          },
+          timeout: 10000,
         },
-      },
-    );
+      );
 
-    const parsedData = parserResponse.data;
+      const parsedData = parserResponse.data;
 
-    // Update candidate with parsed information
-    if (parsedData.skills) {
-      candidate.skills = parsedData.skills;
+      // Update candidate with parsed information
+      if (parsedData.skills) {
+        candidate.skills = parsedData.skills;
+      }
+
+      if (parsedData.education) {
+        candidate.education = parsedData.education;
+      }
+
+      if (parsedData.experience !== undefined) {
+        candidate.experience = parsedData.experience;
+      }
+
+      parsingStatus = "completed";
+      await candidate.save();
+    } catch (parserError) {
+      parsingStatus = "unavailable";
+      console.warn("Resume parser unavailable:", parserError.message);
     }
-
-    if (parsedData.education) {
-      candidate.education = parsedData.education;
-    }
-
-    if (parsedData.experience !== undefined) {
-      candidate.experience = parsedData.experience;
-    }
-
-    await candidate.save();
 
     res.status(200).json({
-      message: "Resume uploaded and parsed successfully",
+      message:
+        parsingStatus === "completed"
+          ? "Resume uploaded and parsed successfully"
+          : "Resume uploaded successfully. Parsing is currently unavailable.",
+      parsingStatus,
 
       candidate: {
         id: candidate._id,
@@ -408,6 +458,7 @@ const submitFeedback = async (req, res) => {
 module.exports = {
   registerCandidate,
   getCandidates,
+  getCandidateById,
   getMyProfile,
   getMyAllocations,
   getMyRecommendations,

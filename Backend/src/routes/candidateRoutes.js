@@ -6,6 +6,7 @@ const roleMiddleware = require("../middleware/roleMiddleware");
 const {
   registerCandidate,
   getCandidates,
+  getCandidateById,
   getMyProfile,
   loginCandidate,
   updateMyProfile,
@@ -27,5 +28,6 @@ router.post("/resume", authMiddleware, roleMiddleware("candidate"), upload.singl
 router.get("/me/allocations", authMiddleware, roleMiddleware("candidate"), getMyAllocations);
 router.get("/me/recommendations", authMiddleware, roleMiddleware("candidate"), getMyRecommendations);
 router.post("/me/feedback", authMiddleware, roleMiddleware("candidate"), submitFeedback);
+router.get("/:id", authMiddleware, roleMiddleware("admin", "officer"), getCandidateById);
 
 module.exports = router;

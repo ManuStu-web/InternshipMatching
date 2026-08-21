@@ -889,6 +889,24 @@ body {
   color: var(--accent);
 }
 
+.candidate-name-button {
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  padding: 0;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+}
+
+.candidate-name-button:hover,
+.candidate-name-button:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .resume-summary {
   display: grid;
   gap: 8px;
@@ -1234,6 +1252,62 @@ body {
   box-shadow: var(--shadow);
 }
 
+.candidate-detail-backdrop {
+  align-items: start;
+  overflow-y: auto;
+}
+
+.candidate-detail-panel {
+  width: min(1040px, 100%);
+  margin: 28px 0;
+  max-height: none;
+}
+
+.candidate-detail-header,
+.candidate-profile-title,
+.allocation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.candidate-profile {
+  display: grid;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.candidate-profile-title {
+  align-items: flex-start;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.candidate-profile-title h2 {
+  margin: 4px 0 6px;
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+}
+
+.candidate-profile-title p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.candidate-detail-section {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(25, 23, 68, 0.02);
+}
+
+.candidate-detail-section h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1257,10 +1331,72 @@ body {
   text-transform: uppercase;
 }
 
+.detail-grid.single-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.detail-grid strong {
+  overflow-wrap: anywhere;
+}
+
 .detail-copy {
   margin: 18px 0 0;
   color: var(--text-secondary);
   line-height: 1.7;
+}
+
+.detail-copy.compact {
+  margin: 0;
+}
+
+.preference-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.preference-grid > div {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.preference-grid span {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.candidate-resume-link {
+  width: fit-content;
+  text-decoration: none;
+}
+
+.allocation-list {
+  display: grid;
+  gap: 10px;
+}
+
+.allocation-row {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.allocation-row strong,
+.allocation-row small {
+  display: block;
+}
+
+.allocation-row small {
+  margin-top: 4px;
+  color: var(--text-secondary);
 }
 
 .close-button {
@@ -1297,6 +1433,8 @@ body {
   .resume-grid,
   .internship-grid,
   .field-grid,
+  .detail-grid,
+  .preference-grid,
   .summary-grid {
     grid-template-columns: 1fr;
   }

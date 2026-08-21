@@ -99,6 +99,10 @@ export function getCandidates(token) {
   return request('/candidates', { method: 'GET' }, token);
 }
 
+export function getCandidateById(candidateId, token) {
+  return request(`/candidates/${candidateId}`, { method: 'GET' }, token);
+}
+
 export function createInternship(payload, token) {
   return request('/internships', {
     method: 'POST',
