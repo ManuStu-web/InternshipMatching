@@ -283,7 +283,11 @@ function AuthPage() {
         <div className="grain" />
 
         <header className="brand-lockup">
-          <span className="brand-emblem" aria-hidden="true"><span /></span>
+          <span className="brand-emblem" aria-hidden="true">
+            <span className="dot dot-1" />
+            <span className="dot dot-2" />
+            <span className="dot dot-3" />
+          </span>
           <span><strong>Intern</strong>Setu</span>
         </header>
 
@@ -313,7 +317,11 @@ function AuthPage() {
 
         <div className={`form-inner mode-${isLogin ? 'login' : 'register'}`}>
           <div className="mobile-brand">
-            <span className="brand-emblem"><span /></span>
+            <span className="brand-emblem" aria-hidden="true">
+              <span className="dot dot-1" />
+              <span className="dot dot-2" />
+              <span className="dot dot-3" />
+            </span>
             <span><strong>Intern</strong>Setu</span>
           </div>
 
@@ -321,6 +329,7 @@ function AuthPage() {
             <button type="button" className={isCandidate ? 'active' : ''} onClick={() => switchAccountType('candidate')} aria-selected={isCandidate}>Candidate</button>
             <button type="button" className={!isCandidate ? 'active' : ''} onClick={() => switchAccountType('government')} aria-selected={!isCandidate}>Government</button>
           </div>
+
 
           <div className="heading-block">
             <p className="eyebrow dark"><span /> WELCOME ABOARD</p>

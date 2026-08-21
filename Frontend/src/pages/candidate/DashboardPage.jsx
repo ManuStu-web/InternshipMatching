@@ -71,10 +71,10 @@ export default function DashboardPage({ onNavigate }) {
   }, [profile]);
 
   const quickActions = [
-    { label: 'Complete profile', description: 'Update your education, skills, and preferences.', path: '/candidate/profile' },
-    { label: 'Upload resume', description: 'Add your latest resume to improve matching.', path: '/candidate/resume' },
-    { label: 'Explore internships', description: 'Browse internships that match your profile.', path: '/candidate/internships' },
-    { label: 'View recommendations', description: 'Review the best internship matches for you.', path: '/candidate/dashboard' },
+    { label: 'Complete Profile', description: 'Update education, skills & affirmative action details.', path: '/candidate/profile', icon: '👤' },
+    { label: 'Upload Resume', description: 'Parse your latest CV with AI for automatic skill extraction.', path: '/candidate/resume', icon: '📄' },
+    { label: 'Explore & Rank', description: 'Discover PM scheme internships and set top 3 preferences.', path: '/candidate/internships', icon: '💼' },
+    { label: 'Placement Status', description: 'Track AI matching, seat allocations, and offer status.', path: '/candidate/allocations', icon: '⚑' },
   ];
 
   const name = profile?.name || session?.user?.name || 'Candidate';
@@ -175,18 +175,33 @@ export default function DashboardPage({ onNavigate }) {
 
           <div className="panel">
             <div className="section-head">
-              <h3>Quick actions</h3>
+              <div>
+                <h3>Quick Actions</h3>
+                <p className="page-subtitle" style={{ margin: '2px 0 0', fontSize: '0.84rem' }}>
+                  Fast access to manage your internship application pipeline.
+                </p>
+              </div>
             </div>
 
             <div className="quick-action-grid">
               {quickActions.map((action) => (
-                <button key={action.label} type="button" className="quick-action" onClick={() => action.path !== '/candidate/dashboard' && onNavigate(action.path)}>
+                <button
+                  key={action.label}
+                  type="button"
+                  className="quick-action"
+                  onClick={() => onNavigate(action.path)}
+                >
+                  <div className="quick-action-top">
+                    <span className="quick-action-icon">{action.icon}</span>
+                    <span className="quick-action-arrow">→</span>
+                  </div>
                   <strong>{action.label}</strong>
                   <span>{action.description}</span>
                 </button>
               ))}
             </div>
           </div>
+
 
           <div className="content-grid dashboard-grid">
             <div className="panel">

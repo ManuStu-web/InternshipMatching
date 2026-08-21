@@ -142,20 +142,22 @@ export default function GovernmentInternshipsPage() {
           <p>There are currently no internships available in the system.</p>
         </div>
       ) : (
-        <div className="content-grid dashboard-grid">
+        <div className="internship-grid">
           {internships.map(internship => (
-            <div key={internship._id} className="panel">
-              <div className="status-header">
-                <h3>{internship.title}</h3>
-                <span className={`status-badge ${internship.availableSeats > 0 ? 'success' : 'muted'}`}>
-                  {internship.availableSeats > 0 ? `${internship.availableSeats} Seats` : 'Full'}
-                </span>
-              </div>
-              <div style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
-                <strong>{internship.organization}</strong> • {internship.location}
+            <div key={internship._id} className="panel internship-card">
+              <div>
+                <div className="status-header">
+                  <h3>{internship.title}</h3>
+                  <span className={`status-badge ${internship.availableSeats > 0 ? 'success' : 'muted'}`}>
+                    {internship.availableSeats > 0 ? `${internship.availableSeats} Seats` : 'Full'}
+                  </span>
+                </div>
+                <div style={{ margin: '6px 0 14px', color: 'var(--text-muted)' }}>
+                  <strong>{internship.organization}</strong> • {internship.location}
+                </div>
               </div>
               
-              <ul className="mini-list compact-list">
+              <ul className="mini-list compact-list" style={{ marginTop: 'auto' }}>
                 <li><strong>Role:</strong> {internship.role}</li>
                 <li><strong>Sector:</strong> {internship.sector}</li>
                 <li><strong>Skills:</strong> {internship.requiredSkills?.slice(0,3).join(', ') || 'None'} {internship.requiredSkills?.length > 3 ? '...' : ''}</li>
@@ -163,6 +165,7 @@ export default function GovernmentInternshipsPage() {
             </div>
           ))}
         </div>
+
       )}
     </div>
   );
