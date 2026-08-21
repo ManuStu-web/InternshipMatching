@@ -12,6 +12,7 @@ const {
   uploadResume,
   getMyAllocations,
   getMyRecommendations,
+  submitFeedback,
 } = require("../controllers/candidateController");
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.put("/me", authMiddleware, roleMiddleware("candidate"), updateMyProfile);
 router.post("/resume", authMiddleware, roleMiddleware("candidate"), upload.single("resume"), uploadResume);
 router.get("/me/allocations", authMiddleware, roleMiddleware("candidate"), getMyAllocations);
 router.get("/me/recommendations", authMiddleware, roleMiddleware("candidate"), getMyRecommendations);
+router.post("/me/feedback", authMiddleware, roleMiddleware("candidate"), submitFeedback);
 
 module.exports = router;

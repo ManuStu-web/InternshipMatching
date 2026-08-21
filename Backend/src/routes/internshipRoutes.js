@@ -16,8 +16,8 @@ router.post(
   roleMiddleware("admin", "officer"),
   createInternship,
 );
-router.get("/", getInternship);
-router.get("/:internshipId", getInternshipById);
+router.get("/", authMiddleware, getInternship);
+router.get("/:internshipId", authMiddleware, getInternshipById);
 
 
 module.exports = router;

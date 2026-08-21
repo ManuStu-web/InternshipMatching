@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
-  { label: 'Dashboard', path: '/candidate/dashboard', icon: '▣' },
-  { label: 'My Profile', path: '/candidate/profile', icon: '◉' },
-  { label: 'Resume', path: '/candidate/resume', icon: '☰' },
-  { label: 'Internships', path: '/candidate/internships', icon: '⌕' },
-  { label: 'Allocations', path: '/candidate/allocations', icon: '⚑' },
+  { label: 'Overview', path: '/government/dashboard', icon: '▣' },
+  { label: 'Internships', path: '/government/internships', icon: '💼' },
+  { label: 'Candidates', path: '/government/candidates', icon: '👥' },
+  { label: 'Allocations', path: '/government/allocations', icon: '⚖' },
 ];
 
 function ThemeToggle({ theme, onToggle }) {
@@ -18,7 +17,7 @@ function ThemeToggle({ theme, onToggle }) {
   );
 }
 
-export default function CandidateLayout({ activePath, onNavigate, theme, onThemeToggle, children }) {
+export default function GovernmentLayout({ activePath, onNavigate, theme, onThemeToggle, children }) {
   const { session, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -28,19 +27,19 @@ export default function CandidateLayout({ activePath, onNavigate, theme, onTheme
 
   return (
     <div className="candidate-app-shell">
-      <aside className={`candidate-sidebar ${mobileOpen ? 'open' : ''}`}>
+      <aside className={`candidate-sidebar ${mobileOpen ? 'open' : ''}`} style={{ borderRight: '1px solid var(--border)', background: 'var(--surface-sunken)' }}>
         <div>
           <div className="sidebar-brand">
-            <span className="brand-mark">I</span>
+            <span className="brand-mark" style={{ background: 'var(--color-primary-dark)' }}>G</span>
             <div>
-              <strong>Intern</strong>Setu
+              <strong>Gov</strong>Portal
             </div>
           </div>
 
-          <p className="sidebar-tagline">AI-powered internship matching and allocation for India’s youth.</p>
+          <p className="sidebar-tagline">Manage SIH Internship Scheme & Allocations.</p>
         </div>
 
-        <nav className="sidebar-nav" aria-label="Candidate navigation">
+        <nav className="sidebar-nav" aria-label="Government navigation">
           {navItems.map((item) => (
             <button
               key={item.path}
@@ -69,15 +68,17 @@ export default function CandidateLayout({ activePath, onNavigate, theme, onTheme
               ☰
             </button>
             <div>
-              <p className="eyebrow dark"><span /> CANDIDATE PORTAL</p>
-              <h1>InternSetu</h1>
+              <p className="eyebrow dark"><span style={{ background: 'var(--color-primary)' }} /> GOVERNMENT CONTROL PANEL</p>
+              <h1>InternSetu Admin</h1>
             </div>
           </div>
 
           <div className="header-actions">
             <div className="user-pill">
-              <span className="avatar">{(session?.user?.name || 'C').charAt(0).toUpperCase()}</span>
-              <span>{session?.user?.name || 'Candidate'}</span>
+              <span className="avatar" style={{ background: 'var(--color-primary-dark)' }}>
+                {(session?.user?.name || 'A').charAt(0).toUpperCase()}
+              </span>
+              <span>{session?.user?.name || 'Admin'}</span>
             </div>
             <ThemeToggle theme={theme || 'light'} onToggle={onThemeToggle || (() => {})} />
           </div>

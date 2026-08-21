@@ -83,3 +83,33 @@ export function getInternships(token) {
 export function getCandidateRecommendations(token) {
   return request('/candidates/me/recommendations', { method: 'GET' }, token);
 }
+
+export function getCandidateAllocations(token) {
+  return request('/candidates/me/allocations', { method: 'GET' }, token);
+}
+
+export function submitCandidateFeedback(payload, token) {
+  return request('/candidates/me/feedback', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }, token);
+}
+
+export function getCandidates(token) {
+  return request('/candidates', { method: 'GET' }, token);
+}
+
+export function createInternship(payload, token) {
+  return request('/internships', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }, token);
+}
+
+export function runAllocation(internshipId, token) {
+  return request(`/allocation/run/${internshipId}`, { method: 'POST' }, token);
+}
+
+export function getAllocationResults(internshipId, token) {
+  return request(`/allocation/internship/${internshipId}`, { method: 'GET' }, token);
+}

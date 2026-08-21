@@ -6,6 +6,12 @@ import DashboardPage from './pages/candidate/DashboardPage';
 import ProfilePage from './pages/candidate/ProfilePage';
 import ResumePage from './pages/candidate/ResumePage';
 import InternshipsPage from './pages/candidate/InternshipsPage';
+import AllocationsPage from './pages/candidate/AllocationsPage';
+import GovernmentLayout from './components/GovernmentLayout';
+import GovernmentDashboardPage from './pages/government/DashboardPage';
+import GovernmentInternshipsPage from './pages/government/InternshipsPage';
+import GovernmentCandidatePoolPage from './pages/government/CandidatePoolPage';
+import GovernmentAllocationPage from './pages/government/AllocationPage';
 
 const THEME_KEY = 'internsetu-theme';
 
@@ -26,36 +32,20 @@ function getInitialTheme() {
   return 'light';
 }
 
-function GovernmentDashboard() {
-  const { session, logout } = useAuth();
+
+
+function GovernmentPortal({ route, onNavigate, theme, onThemeToggle }) {
+  const pages = {
+    '/government/dashboard': <GovernmentDashboardPage onNavigate={onNavigate} />,
+    '/government/internships': <GovernmentInternshipsPage onNavigate={onNavigate} />,
+    '/government/candidates': <GovernmentCandidatePoolPage onNavigate={onNavigate} />,
+    '/government/allocations': <GovernmentAllocationPage onNavigate={onNavigate} />,
+  };
 
   return (
-    <div className="dashboard-shell">
-      <div className="dashboard-card">
-        <div className="dashboard-header">
-          <div>
-            <span className="eyebrow dark"><span /> GOVERNMENT PORTAL</span>
-            <h2>{session.user?.department || 'Government Office'}</h2>
-          </div>
-          <button type="button" className="secondary-button" onClick={logout}>Logout</button>
-        </div>
-        <div className="metrics-grid">
-          <div className="metric-tile">
-            <span>Role</span>
-            <strong>{session.user?.role}</strong>
-          </div>
-          <div className="metric-tile">
-            <span>Email</span>
-            <strong>{session.user?.email}</strong>
-          </div>
-          <div className="metric-tile">
-            <span>Status</span>
-            <strong>Authorized</strong>
-          </div>
-        </div>
-        <p className="dashboard-note">Government flows are connected to the real backend with admin/officer authorization checks.</p>
-      </div>
-    </div>
+    <GovernmentLayout activePath={route} onNavigate={onNavigate} theme={theme} onThemeToggle={onThemeToggle}>
+      {pages[route] || <GovernmentDashboardPage onNavigate={onNavigate} />}
+    </GovernmentLayout>
   );
 }
 
@@ -65,6 +55,7 @@ function CandidatePortal({ route, onNavigate, theme, onThemeToggle }) {
     '/candidate/profile': <ProfilePage onNavigate={onNavigate} />,
     '/candidate/resume': <ResumePage onNavigate={onNavigate} />,
     '/candidate/internships': <InternshipsPage onNavigate={onNavigate} />,
+    '/candidate/allocations': <AllocationsPage onNavigate={onNavigate} />,
   };
 
   return (
@@ -94,10 +85,12 @@ function AppContent() {
       return;
     }
 
-    if (session.user?.role !== 'candidate') {
+    if (session.user?.role === 'candidate' && !route.startsWith('/candidate')) {
       setRoute('/candidate/dashboard');
+    } else if ((session.user?.role === 'admin' || session.user?.role === 'officer') && !route.startsWith('/government')) {
+      setRoute('/government/dashboard');
     }
-  }, [session]);
+  }, [session, route]);
 
   if (!session || !session.token) {
     return <AuthPage />;
@@ -108,7 +101,7 @@ function AppContent() {
   }
 
   if (session.user?.role === 'admin' || session.user?.role === 'officer') {
-    return <GovernmentDashboard />;
+    return <GovernmentPortal route={route} onNavigate={setRoute} theme={theme} onThemeToggle={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))} />;
   }
 
   return <AuthPage />;
