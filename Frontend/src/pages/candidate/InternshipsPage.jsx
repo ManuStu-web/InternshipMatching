@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { applyForInternship, getInternships } from '../../services/api';
 import { useEffect, useMemo, useState } from 'react';
 import {
   getInternships,
@@ -19,6 +21,18 @@ export default function InternshipsPage() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [selected, setSelected] = useState(null);
   const [updatingPref, setUpdatingPref] = useState(false);
+
+  const [applying, setApplying] = useState(false);
+  const [showAllocationPopup, setShowAllocationPopup] = useState(false);
+
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -128,6 +142,34 @@ export default function InternshipsPage() {
       return matchesSearch && matchesLocation && matchesSector && matchesRole;
     });
   }, [internships, locationFilter, sectorFilter, roleFilter, query]);
+
+  const selectedSeats = selected ? (selected.availableSeats ?? selected.totalSeats ?? 0) : 0;
+
+  const handleApply = async () => {
+    if (!selected || applying || selectedSeats <= 0) return;
+    setApplying(true);
+
+    try {
+      await applyForInternship(selected._id);
+      if (!isMountedRef.current) return;
+      setApplying(false);
+      setShowAllocationPopup(true);
+      setInternships((currentInternships) => currentInternships.map((internship) => (
+        internship._id === selected._id
+          ? { ...internship, availableSeats: Math.max(0, selectedSeats - 1) }
+          : internship
+      )));
+    } catch (applyError) {
+      if (!isMountedRef.current) return;
+      setApplying(false);
+      setError(applyError.message || 'Unable to submit application.');
+    }
+  };
+
+  const closeAllocationPopup = () => {
+    setShowAllocationPopup(false);
+    setSelected(null);
+  };
 
   return (
     <div className="page-stack">
@@ -313,6 +355,12 @@ export default function InternshipsPage() {
         </div>
       )}
 
+      {selected && !showAllocationPopup && (
+        <div className="modal-backdrop" onClick={() => !applying && setSelected(null)}>
+          <div className="modal-panel" onClick={(event) => event.stopPropagation()}>
+            <div className="section-head">
+              <h3>{selected.title}</h3>
+              <button type="button" className="close-button" onClick={() => setSelected(null)} disabled={applying}>×</button>
       {/* Detail Modal */}
       {selected && (
         <div className="modal-backdrop" onClick={() => setSelected(null)}>
@@ -363,6 +411,40 @@ export default function InternshipsPage() {
                 <span key={`${selected._id}-${skill}`} className="chip">{skill}</span>
               ))}
             </div>
+
+            <div className="detail-actions">
+              <button
+                type="button"
+                className="primary-button"
+                disabled={applying || selectedSeats <= 0}
+                onClick={handleApply}
+              >
+                {applying ? (
+                  <>
+                    <span className="button-spinner" />
+                    Submitting application…
+                  </>
+                ) : selectedSeats <= 0 ? (
+                  'No seats available'
+                ) : (
+                  'Apply Now'
+                )}
+              </button>
+              <button type="button" className="secondary-button" onClick={() => setSelected(null)} disabled={applying}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAllocationPopup && (
+        <div className="modal-backdrop" onClick={closeAllocationPopup}>
+          <div className="success-modal-panel" onClick={(event) => event.stopPropagation()}>
+            <div className="success-check">✓</div>
+            <h3>Allocation Complete!</h3>
+            <p>Your application for <strong>{selected?.title}</strong> has been submitted and processed successfully.</p>
+            <button type="button" className="primary-button" onClick={closeAllocationPopup}>Done</button>
           </div>
         </div>
       )}

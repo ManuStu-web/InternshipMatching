@@ -2,6 +2,29 @@ import { useEffect, useState } from 'react';
 import { getInternships, createInternship } from '../../services/api';
 import TagInput from '../../components/TagInput';
 
+const LOCATION_OPTIONS = [
+  'New Delhi',
+  'Bengaluru',
+  'Mumbai',
+  'Pune',
+  'Hyderabad',
+  'Chennai',
+  'Ahmedabad',
+  'Kolkata',
+  'Lucknow',
+];
+
+const SKILL_SUGGESTIONS = [
+  'JavaScript',
+  'Python',
+  'React',
+  'Node.js',
+  'MongoDB',
+  'SQL',
+  'HTML',
+  'CSS',
+];
+
 export default function GovernmentInternshipsPage() {
   const [internships, setInternships] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +59,28 @@ export default function GovernmentInternshipsPage() {
   };
 
   useEffect(() => {
-    loadInternships();
+    let isMounted = true;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        const data = await getInternships();
+        if (!isMounted) return;
+        setInternships(data.internship || []);
+        setError('');
+      } catch (err) {
+        if (!isMounted) return;
+        setError(err.message || 'Failed to load internships');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleCreateSubmit = async (e) => {
@@ -100,7 +144,10 @@ export default function GovernmentInternshipsPage() {
                 </div>
                 <div className="form-group">
                   <label>Location *</label>
-                  <input type="text" className="form-control" required value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} />
+                  <select className="form-control" required value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})}>
+                    <option value="">Select a location</option>
+                    {LOCATION_OPTIONS.map((location) => <option key={location} value={location}>{location}</option>)}
+                  </select>
                 </div>
                 <div className="form-group">
                   <label>Sector *</label>
@@ -122,7 +169,13 @@ export default function GovernmentInternshipsPage() {
               
               <div className="form-group">
                 <label>Required Skills *</label>
-                <TagInput tags={formData.requiredSkills} onChange={(skills) => setFormData({...formData, requiredSkills: skills})} placeholder="Add skill and press enter..." />
+                <TagInput
+                  value={formData.requiredSkills}
+                  onChange={(skills) => setFormData({...formData, requiredSkills: skills})}
+                  placeholder="Type a skill and press enter..."
+                  suggestions={SKILL_SUGGESTIONS}
+                  helperText="Choose a suggested skill or add your own."
+                />
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', justifyContent: 'flex-end' }}>

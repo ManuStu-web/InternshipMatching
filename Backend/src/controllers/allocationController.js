@@ -18,6 +18,17 @@ const runAllocation = async (req, res) => {
       return res.status(404).json({ message: "Internship not found" });
     }
 
+    const currentAllocations = await Allocation.find({
+      internship: internship._id,
+      status: "ALLOCATED",
+    }).select("candidate");
+
+    // Restore the capacity consumed by this internship's current results
+    // before recalculating, so rerunning allocation does not lose seats.
+    const allocationCapacity = internship.availableSeats + currentAllocations.length;
+
+    // 2. Find candidates who are already
+    // allocated to ANOTHER internship
     const existingAllocations = await Allocation.find({
       status: "ALLOCATED",
       internship: { $ne: internship._id },
@@ -39,7 +50,11 @@ const runAllocation = async (req, res) => {
       });
     }
 
-    const result = allocateSeats(candidates, internship, weights || {});
+    // 7. Run matching and allocation
+    const result = allocateSeats(candidates, {
+      ...internship.toObject(),
+      availableSeats: allocationCapacity,
+    });
 
     // Clear previous results for this internship
     await Allocation.deleteMany({ internship: internship._id });
@@ -57,6 +72,12 @@ const runAllocation = async (req, res) => {
       await Allocation.insertMany(allocationDocuments);
     }
 
+    await Internship.updateOne(
+      { _id: internship._id },
+      { $set: { availableSeats: allocationCapacity - result.allocatedSeats } },
+    );
+
+    // 11. Send result
     res.status(200).json({
       message: "Single internship allocation completed successfully",
       result: {

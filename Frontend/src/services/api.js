@@ -4,7 +4,7 @@ function getStoredSession() {
   try {
     const raw = localStorage.getItem('sih25033-session');
     return raw ? JSON.parse(raw) : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -86,6 +86,10 @@ export function getCandidateRecommendations(token) {
 
 export function getCandidateAllocations(token) {
   return request('/candidates/me/allocations', { method: 'GET' }, token);
+}
+
+export function applyForInternship(internshipId, token) {
+  return request(`/candidates/me/apply/${internshipId}`, { method: 'POST' }, token);
 }
 
 export function submitCandidateFeedback(payload, token) {

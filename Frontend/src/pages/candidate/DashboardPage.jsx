@@ -9,6 +9,9 @@ export default function DashboardPage({ onNavigate }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const [showAllRecommendations, setShowAllRecommendations] = useState(false);
+  const [recommendationsPulse, setRecommendationsPulse] = useState(false);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -70,11 +73,23 @@ export default function DashboardPage({ onNavigate }) {
     return results;
   }, [profile]);
 
+  // Scrolls to and expands the recommendations panel below, with a brief
+  // highlight pulse so the button visibly "does something" for the user.
+  const handleViewRecommendations = () => {
+    setShowAllRecommendations(true);
+    setRecommendationsPulse(true);
+    window.setTimeout(() => {
+      const recommendationsPanel = document.getElementById('recommendations-panel');
+      recommendationsPanel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setRecommendationsPulse(false);
+    }, 80);
+  };
+
   const quickActions = [
-    { label: 'Complete profile', description: 'Update your education, skills, and preferences.', path: '/candidate/profile' },
-    { label: 'Upload resume', description: 'Add your latest resume to improve matching.', path: '/candidate/resume' },
-    { label: 'Explore internships', description: 'Browse internships that match your profile.', path: '/candidate/internships' },
-    { label: 'View recommendations', description: 'Review the best internship matches for you.', path: '/candidate/dashboard' },
+    { label: 'Complete profile', description: 'Update your education, skills, and preferences.', onClick: () => onNavigate('/candidate/profile') },
+    { label: 'Upload resume', description: 'Add your latest resume to improve matching.', onClick: () => onNavigate('/candidate/resume') },
+    { label: 'Explore internships', description: 'Browse internships that match your profile.', onClick: () => onNavigate('/candidate/internships') },
+    { label: 'View recommendations', description: 'Jump to your best internship matches below.', onClick: handleViewRecommendations },
   ];
 
   const name = profile?.name || session?.user?.name || 'Candidate';
@@ -180,7 +195,7 @@ export default function DashboardPage({ onNavigate }) {
 
             <div className="quick-action-grid">
               {quickActions.map((action) => (
-                <button key={action.label} type="button" className="quick-action" onClick={() => action.path !== '/candidate/dashboard' && onNavigate(action.path)}>
+                <button key={action.label} type="button" className="quick-action" onClick={action.onClick}>
                   <strong>{action.label}</strong>
                   <span>{action.description}</span>
                 </button>
@@ -204,9 +219,21 @@ export default function DashboardPage({ onNavigate }) {
               </div>
             </div>
 
-            <div className="panel">
-              <div className="section-head">
+            <div
+              id="recommendations-panel"
+              className={`panel ${recommendationsPulse ? 'recommendation-highlight' : ''}`}
+            >
+              <div className="section-head recommendations-panel-head">
                 <h3>Recommended for you</h3>
+                {recommendations.length > 3 && (
+                  <button
+                    type="button"
+                    className="view-all-link"
+                    onClick={() => setShowAllRecommendations((current) => !current)}
+                  >
+                    {showAllRecommendations ? 'Show top matches' : `View all ${recommendations.length}`}
+                  </button>
+                )}
               </div>
 
               {recommendations.length === 0 ? (
@@ -216,7 +243,7 @@ export default function DashboardPage({ onNavigate }) {
                 </div>
               ) : (
                 <div className="mini-list recommendations-list">
-                  {recommendations.slice(0, 3).map((item) => (
+                  {(showAllRecommendations ? recommendations : recommendations.slice(0, 3)).map((item) => (
                     <div key={item.internship?._id || item.internship?.title} className="recommendation-item">
                       <div>
                         <strong>{item.internship?.title || 'Internship'}</strong>

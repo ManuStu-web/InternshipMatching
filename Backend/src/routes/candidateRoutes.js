@@ -13,6 +13,7 @@ const {
   saveCandidatePreferences,
   uploadResume,
   getMyAllocations,
+  applyForInternship,
   getMyRecommendations,
   submitFeedback,
 } = require("../controllers/candidateController");
@@ -28,6 +29,7 @@ router.put("/me", authMiddleware, roleMiddleware("candidate"), updateMyProfile);
 router.put("/me/preferences", authMiddleware, roleMiddleware("candidate"), saveCandidatePreferences);
 router.post("/resume", authMiddleware, roleMiddleware("candidate"), upload.single("resume"), uploadResume);
 router.get("/me/allocations", authMiddleware, roleMiddleware("candidate"), getMyAllocations);
+router.post("/me/apply/:internshipId", authMiddleware, roleMiddleware("candidate"), applyForInternship);
 router.get("/me/recommendations", authMiddleware, roleMiddleware("candidate"), getMyRecommendations);
 router.post("/me/feedback", authMiddleware, roleMiddleware("candidate"), submitFeedback);
 router.get("/:id", authMiddleware, roleMiddleware("admin", "officer"), getCandidateById);

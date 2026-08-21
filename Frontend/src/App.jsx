@@ -21,7 +21,7 @@ function getInitialTheme() {
     if (savedTheme === 'light' || savedTheme === 'dark') {
       return savedTheme;
     }
-  } catch (error) {
+  } catch {
     // Ignore storage errors and fall back to the system preference.
   }
 
@@ -74,34 +74,27 @@ function AppContent() {
     document.documentElement.setAttribute('data-theme', theme);
     try {
       localStorage.setItem(THEME_KEY, theme);
-    } catch (error) {
+    } catch {
       // Ignore storage write issues in restricted environments.
     }
   }, [theme]);
 
-  useEffect(() => {
-    if (!session || !session.token) {
-      setRoute('/candidate/dashboard');
-      return;
-    }
-
-    if (session.user?.role === 'candidate' && !route.startsWith('/candidate')) {
-      setRoute('/candidate/dashboard');
-    } else if ((session.user?.role === 'admin' || session.user?.role === 'officer') && !route.startsWith('/government')) {
-      setRoute('/government/dashboard');
-    }
-  }, [session, route]);
+  const effectiveRoute = !session || !session.token
+    ? '/candidate/dashboard'
+    : session.user?.role === 'candidate'
+      ? route.startsWith('/candidate') ? route : '/candidate/dashboard'
+      : route.startsWith('/government') ? route : '/government/dashboard';
 
   if (!session || !session.token) {
     return <AuthPage />;
   }
 
   if (session.user?.role === 'candidate') {
-    return <CandidatePortal route={route} onNavigate={setRoute} theme={theme} onThemeToggle={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))} />;
+    return <CandidatePortal route={effectiveRoute} onNavigate={setRoute} theme={theme} onThemeToggle={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))} />;
   }
 
   if (session.user?.role === 'admin' || session.user?.role === 'officer') {
-    return <GovernmentPortal route={route} onNavigate={setRoute} theme={theme} onThemeToggle={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))} />;
+    return <GovernmentPortal route={effectiveRoute} onNavigate={setRoute} theme={theme} onThemeToggle={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))} />;
   }
 
   return <AuthPage />;

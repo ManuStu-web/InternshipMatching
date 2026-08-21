@@ -121,6 +121,62 @@ const calculateRoleScore = (candidateRoles, internshipRole) => {
     return 0;
   }
 
+  // Similar roles are grouped together.
+  const roleGroups = {
+    software: [
+      "software engineer",
+      "software developer",
+      "software development",
+      "sde",
+    ],
+
+    frontend: [
+      "frontend developer",
+      "frontend engineer",
+      "react developer",
+      "ui developer",
+    ],
+
+    backend: [
+      "backend developer",
+      "backend engineer",
+      "node.js developer",
+      "server-side developer",
+    ],
+
+    fullstack: [
+      "full stack developer",
+      "fullstack developer",
+      "full stack engineer",
+    ],
+
+    data: ["data analyst", "data scientist", "data engineer"],
+
+    ml: ["machine learning engineer", "ml engineer", "ai engineer"],
+  };
+
+  const normalizeRole = (role) => role
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+
+  const ignoredWords = new Set([
+    "a",
+    "an",
+    "and",
+    "engineer",
+    "intern",
+    "specialist",
+    "professional",
+  ]);
+
+  const getRoleWords = (role) => normalizeRole(role)
+    .split(" ")
+    .filter((word) => word.length > 1 && !ignoredWords.has(word));
+
+  const normalizedRoles = candidateRoles.map(normalizeRole);
+  const normalizedInternshipRole = normalizeRole(internshipRole);
   const normalizedRoles = candidateRoles.map((role) => role.toLowerCase().trim());
   const normalizedInternshipRole = internshipRole.toLowerCase().trim();
 
@@ -144,7 +200,31 @@ const calculateRoleScore = (candidateRoles, internshipRole) => {
     }
   }
 
-  return 0;
+  if (normalizedRoles.includes(normalizedInternshipRole)) {
+    return 100;
+  }
+
+  const internshipWords = new Set(getRoleWords(internshipRole));
+  if (internshipWords.size === 0) {
+    return 0;
+  }
+
+  return Math.max(
+    ...normalizedRoles.map((role) => {
+      const candidateWords = new Set(getRoleWords(role));
+      const sharedWords = [...internshipWords].filter((word) => candidateWords.has(word));
+
+      if (sharedWords.length === 0) {
+        return 0;
+      }
+
+      if (role.includes(normalizedInternshipRole) || normalizedInternshipRole.includes(role)) {
+        return 90;
+      }
+
+      return (sharedWords.length / Math.max(candidateWords.size, internshipWords.size)) * 100;
+    }),
+  );
 };
 
 // ============================================================
