@@ -12,6 +12,14 @@ const emptyForm = {
   graduationYear: '',
   experience: '',
   eligibility: true,
+  gender: 'Prefer not to say',
+  socialCategory: 'General',
+  district: '',
+  state: '',
+  areaType: 'Urban',
+  isAspirationalDistrict: false,
+  pastBeneficiary: false,
+  firstGenerationLearner: false,
 };
 
 export default function ProfilePage() {
@@ -44,6 +52,14 @@ export default function ProfilePage() {
           graduationYear: candidate.education?.graduationYear ?? '',
           experience: candidate.experience ?? '',
           eligibility: candidate.eligibility !== false,
+          gender: candidate.gender || 'Prefer not to say',
+          socialCategory: candidate.socialCategory || 'General',
+          district: candidate.district || '',
+          state: candidate.state || '',
+          areaType: candidate.areaType || 'Urban',
+          isAspirationalDistrict: Boolean(candidate.isAspirationalDistrict),
+          pastBeneficiary: Boolean(candidate.pastBeneficiary),
+          firstGenerationLearner: Boolean(candidate.firstGenerationLearner),
         });
 
         setSkills(Array.isArray(candidate.skills) ? candidate.skills : []);
@@ -92,10 +108,18 @@ export default function ProfilePage() {
         preferredSectors,
         experience: form.experience !== '' ? Number(form.experience) : 0,
         eligibility: form.eligibility,
+        gender: form.gender,
+        socialCategory: form.socialCategory,
+        district: form.district,
+        state: form.state,
+        areaType: form.areaType,
+        isAspirationalDistrict: form.isAspirationalDistrict,
+        pastBeneficiary: form.pastBeneficiary,
+        firstGenerationLearner: form.firstGenerationLearner,
       };
 
       await updateCandidateProfile(payload);
-      setSuccess('Profile updated successfully.');
+      setSuccess('Profile updated successfully with Affirmative Action and Inclusivity details.');
     } catch (submitError) {
       setError(submitError.message || 'Unable to save profile.');
     } finally {
@@ -113,7 +137,7 @@ export default function ProfilePage() {
         <div>
           <p className="eyebrow dark"><span /> MY PROFILE</p>
           <h2>Build your student profile</h2>
-          <p className="page-subtitle">Add your details so InternSetu can match you with better internship opportunities.</p>
+          <p className="page-subtitle">Add your details so the PM Internship matchmaking engine can find your optimal opportunities.</p>
         </div>
       </section>
 
@@ -122,7 +146,7 @@ export default function ProfilePage() {
 
       <form className="panel form-panel-card" onSubmit={handleSubmit}>
         <div className="section-header-with-copy">
-          <h3>Personal information</h3>
+          <h3>Personal Information</h3>
         </div>
         <div className="field-grid">
           <label className="field-group">
@@ -135,24 +159,90 @@ export default function ProfilePage() {
             <input value={form.email || 'Not available'} readOnly />
           </label>
 
-          <label className="field-group full-width">
+          <label className="field-group">
             <span>Phone number</span>
             <input name="phone" value={form.phone} onChange={handleChange} placeholder="+91 00000 00000" />
           </label>
+
+          <label className="field-group">
+            <span>Gender</span>
+            <select name="gender" value={form.gender} onChange={handleChange} className="form-control">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+          </label>
         </div>
 
-        <div className="section-header-with-copy">
+        {/* Affirmative Action & Inclusivity Details (MoCA Criteria) */}
+        <div className="section-header-with-copy" style={{ marginTop: '1.5rem' }}>
+          <h3>Affirmative Action & Regional Details (PM Scheme Mandate)</h3>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            Information provided here enables affirmative action inclusion for rural youth and NITI Aayog Aspirational Districts.
+          </p>
+        </div>
+        <div className="field-grid">
+          <label className="field-group">
+            <span>Social Category</span>
+            <select name="socialCategory" value={form.socialCategory} onChange={handleChange} className="form-control">
+              <option value="General">General</option>
+              <option value="OBC">OBC (Other Backward Classes)</option>
+              <option value="SC">SC (Scheduled Caste)</option>
+              <option value="ST">ST (Scheduled Tribe)</option>
+              <option value="EWS">EWS (Economically Weaker Section)</option>
+            </select>
+          </label>
+
+          <label className="field-group">
+            <span>Area Classification</span>
+            <select name="areaType" value={form.areaType} onChange={handleChange} className="form-control">
+              <option value="Urban">Urban / Metro</option>
+              <option value="Semi-Urban">Semi-Urban / Tier-2/3</option>
+              <option value="Rural">Rural / Gram Panchayat</option>
+            </select>
+          </label>
+
+          <label className="field-group">
+            <span>Home District</span>
+            <input name="district" value={form.district} onChange={handleChange} placeholder="e.g. Wayanad, Bahraich, Pune" />
+          </label>
+
+          <label className="field-group">
+            <span>Home State</span>
+            <input name="state" value={form.state} onChange={handleChange} placeholder="e.g. Kerala, Uttar Pradesh, Maharashtra" />
+          </label>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', marginTop: '1rem', padding: '1rem', background: 'var(--surface-secondary)', borderRadius: '10px' }}>
+          <label className="checkbox-row">
+            <input type="checkbox" name="isAspirationalDistrict" checked={form.isAspirationalDistrict} onChange={handleChange} />
+            <span><strong>NITI Aayog Aspirational District Resident</strong> (Eligible for priority affirmative weightage)</span>
+          </label>
+
+          <label className="checkbox-row">
+            <input type="checkbox" name="firstGenerationLearner" checked={form.firstGenerationLearner} onChange={handleChange} />
+            <span><strong>First-Generation College Graduate in Family</strong></span>
+          </label>
+
+          <label className="checkbox-row">
+            <input type="checkbox" name="pastBeneficiary" checked={form.pastBeneficiary} onChange={handleChange} />
+            <span>I have previously completed an internship under the PM Internship Scheme</span>
+          </label>
+        </div>
+
+        <div className="section-header-with-copy" style={{ marginTop: '1.5rem' }}>
           <h3>Education</h3>
         </div>
         <div className="field-grid">
           <label className="field-group">
             <span>Degree</span>
-            <input name="degree" value={form.degree} onChange={handleChange} placeholder="B.Tech" />
+            <input name="degree" value={form.degree} onChange={handleChange} placeholder="B.Tech / B.Sc / MCA" />
           </label>
 
           <label className="field-group">
             <span>Branch</span>
-            <input name="branch" value={form.branch} onChange={handleChange} placeholder="Computer Science" />
+            <input name="branch" value={form.branch} onChange={handleChange} placeholder="Computer Science / Electronics" />
           </label>
 
           <label className="field-group">
@@ -162,16 +252,16 @@ export default function ProfilePage() {
 
           <label className="field-group">
             <span>Graduation year</span>
-            <input name="graduationYear" type="number" value={form.graduationYear} onChange={handleChange} placeholder="2026" />
+            <input name="graduationYear" type="number" value={form.graduationYear} onChange={handleChange} placeholder="2025" />
           </label>
 
-          <label className="field-group">
+          <label className="field-group full-width">
             <span>Experience (years)</span>
             <input name="experience" type="number" value={form.experience} onChange={handleChange} placeholder="0" min="0" />
           </label>
         </div>
 
-        <div className="section-header-with-copy">
+        <div className="section-header-with-copy" style={{ marginTop: '1.5rem' }}>
           <h3>Skills</h3>
         </div>
         <TagInput
@@ -182,8 +272,8 @@ export default function ProfilePage() {
           helperText="Press Enter to add a skill. Remove any tag with ×."
         />
 
-        <div className="section-header-with-copy">
-          <h3>Career preferences</h3>
+        <div className="section-header-with-copy" style={{ marginTop: '1.5rem' }}>
+          <h3>Career Preferences</h3>
         </div>
         <TagInput
           label="Preferred locations"
@@ -206,17 +296,17 @@ export default function ProfilePage() {
           value={preferredSectors}
           onChange={setPreferredSectors}
           placeholder="Add a sector..."
-          helperText="For example: Technology, EdTech"
+          helperText="For example: IT, Defense, Finance, Energy"
         />
 
-        <label className="checkbox-row">
+        <label className="checkbox-row" style={{ marginTop: '1rem' }}>
           <input type="checkbox" name="eligibility" checked={form.eligibility} onChange={handleChange} />
-          <span>I am eligible for internship opportunities</span>
+          <span>I am actively eligible and available for PM internship placements</span>
         </label>
 
-        <div className="form-actions">
+        <div className="form-actions" style={{ marginTop: '1.5rem' }}>
           <button type="submit" className="primary-button" disabled={saving}>
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? 'Saving...' : 'Save Profile & Update Preferences'}
           </button>
         </div>
       </form>

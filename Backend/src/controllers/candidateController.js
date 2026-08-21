@@ -24,6 +24,15 @@ const registerCandidate = async (req, res) => {
       preferredSectors,
       experience,
       eligibility,
+      gender,
+      socialCategory,
+      district,
+      state,
+      areaType,
+      isAspirationalDistrict,
+      pastBeneficiary,
+      firstGenerationLearner,
+      preferences,
     } = req.body;
 
     // Check required fields
@@ -71,6 +80,15 @@ const registerCandidate = async (req, res) => {
       preferredSectors,
       experience,
       eligibility,
+      gender,
+      socialCategory,
+      district,
+      state,
+      areaType,
+      isAspirationalDistrict,
+      pastBeneficiary,
+      firstGenerationLearner,
+      preferences: preferences || [],
     });
 
     // Create authentication record
@@ -152,7 +170,10 @@ const getCandidateById = async (req, res) => {
 
 const getMyProfile = async (req, res) => {
   try {
-    const candidate = await Candidate.findById(req.user.id);
+    const candidate = await Candidate.findById(req.user.id).populate(
+      "preferences",
+      "title organization location role sector totalSeats availableSeats"
+    );
 
     if (!candidate) {
       return res.status(404).json({
@@ -210,6 +231,7 @@ const getMyRecommendations = async (req, res) => {
           internship,
           score: result.totalScore,
           breakdown: result.breakdown,
+          reasonSummary: result.reasonSummary,
         };
       })
       .sort((a, b) => b.score - a.score);
@@ -303,6 +325,14 @@ const updateMyProfile = async (req, res) => {
       eligibility,
       preferredRoles,
       preferredSectors,
+      gender,
+      socialCategory,
+      district,
+      state,
+      areaType,
+      isAspirationalDistrict,
+      pastBeneficiary,
+      firstGenerationLearner,
     } = req.body;
 
     const candidate = await Candidate.findById(req.user.id);
@@ -330,6 +360,15 @@ const updateMyProfile = async (req, res) => {
       candidate.preferredSectors = preferredSectors;
     }
 
+    if (gender !== undefined) candidate.gender = gender;
+    if (socialCategory !== undefined) candidate.socialCategory = socialCategory;
+    if (district !== undefined) candidate.district = district;
+    if (state !== undefined) candidate.state = state;
+    if (areaType !== undefined) candidate.areaType = areaType;
+    if (isAspirationalDistrict !== undefined) candidate.isAspirationalDistrict = isAspirationalDistrict;
+    if (pastBeneficiary !== undefined) candidate.pastBeneficiary = pastBeneficiary;
+    if (firstGenerationLearner !== undefined) candidate.firstGenerationLearner = firstGenerationLearner;
+
     await candidate.save();
 
     res.status(200).json({
@@ -339,6 +378,46 @@ const updateMyProfile = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Failed to update profile",
+      error: error.message,
+    });
+  }
+};
+
+const saveCandidatePreferences = async (req, res) => {
+  try {
+    const { preferences } = req.body; // array of internship IDs in ranked order
+
+    if (!Array.isArray(preferences)) {
+      return res.status(400).json({
+        message: "Preferences must be an array of internship IDs",
+      });
+    }
+
+    // Limit to top 3-5 preferences
+    const validPreferences = preferences.slice(0, 5);
+
+    const candidate = await Candidate.findById(req.user.id);
+    if (!candidate) {
+      return res.status(404).json({
+        message: "Candidate profile not found",
+      });
+    }
+
+    candidate.preferences = validPreferences;
+    await candidate.save();
+
+    const populatedCandidate = await Candidate.findById(candidate._id).populate(
+      "preferences",
+      "title organization location role sector totalSeats availableSeats"
+    );
+
+    res.status(200).json({
+      message: "Preferences saved successfully",
+      preferences: populatedCandidate.preferences,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to save preferences",
       error: error.message,
     });
   }
@@ -464,6 +543,7 @@ module.exports = {
   getMyRecommendations,
   loginCandidate,
   updateMyProfile,
+  saveCandidatePreferences,
   uploadResume,
   submitFeedback,
 };

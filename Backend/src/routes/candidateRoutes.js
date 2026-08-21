@@ -10,6 +10,7 @@ const {
   getMyProfile,
   loginCandidate,
   updateMyProfile,
+  saveCandidatePreferences,
   uploadResume,
   getMyAllocations,
   getMyRecommendations,
@@ -24,6 +25,7 @@ router.get("/", authMiddleware, roleMiddleware("admin", "officer"), getCandidate
 
 router.get("/me", authMiddleware, roleMiddleware("candidate"), getMyProfile);
 router.put("/me", authMiddleware, roleMiddleware("candidate"), updateMyProfile);
+router.put("/me/preferences", authMiddleware, roleMiddleware("candidate"), saveCandidatePreferences);
 router.post("/resume", authMiddleware, roleMiddleware("candidate"), upload.single("resume"), uploadResume);
 router.get("/me/allocations", authMiddleware, roleMiddleware("candidate"), getMyAllocations);
 router.get("/me/recommendations", authMiddleware, roleMiddleware("candidate"), getMyRecommendations);
