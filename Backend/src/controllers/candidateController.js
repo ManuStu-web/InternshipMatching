@@ -385,6 +385,26 @@ const uploadResume = async (req, res) => {
     });
   }
 };
+
+const submitFeedback = async (req, res) => {
+  try {
+    const { feedback, rating } = req.body;
+    
+    // As per Phase 5 instructions, we are NOT modifying MongoDB schemas 
+    // to persist feedback yet. We'll simulate a successful submission.
+    
+    console.log(`[Feedback Received] Candidate: ${req.user.id}, Rating: ${rating}, Text: ${feedback}`);
+
+    res.status(200).json({
+      message: "Feedback submitted successfully. Thank you for your input!"
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to submit feedback",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
   registerCandidate,
   getCandidates,
@@ -394,4 +414,5 @@ module.exports = {
   loginCandidate,
   updateMyProfile,
   uploadResume,
+  submitFeedback,
 };
