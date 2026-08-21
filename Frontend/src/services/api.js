@@ -103,6 +103,10 @@ export function getCandidates(token) {
   return request('/candidates', { method: 'GET' }, token);
 }
 
+export function getCandidateById(candidateId, token) {
+  return request(`/candidates/${candidateId}`, { method: 'GET' }, token);
+}
+
 export function createInternship(payload, token) {
   return request('/internships', {
     method: 'POST',
@@ -110,10 +114,49 @@ export function createInternship(payload, token) {
   }, token);
 }
 
-export function runAllocation(internshipId, token) {
-  return request(`/allocation/run/${internshipId}`, { method: 'POST' }, token);
+export function runAllocation(internshipId, payload, token) {
+  return request(`/allocation/run/${internshipId}`, {
+    method: 'POST',
+    body: JSON.stringify(payload || {}),
+  }, token);
+}
+
+export function runGlobalAllocation(payload, token) {
+  return request('/allocation/run-global', {
+    method: 'POST',
+    body: JSON.stringify(payload || {}),
+  }, token);
 }
 
 export function getAllocationResults(internshipId, token) {
   return request(`/allocation/internship/${internshipId}`, { method: 'GET' }, token);
 }
+
+export function getAllAllocations(token) {
+  return request('/allocation/all', { method: 'GET' }, token);
+}
+
+export function getAllocationMetrics(token) {
+  return request('/allocation/metrics', { method: 'GET' }, token);
+}
+
+export function saveCandidatePreferences(payload, token) {
+  return request('/candidates/me/preferences', {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  }, token);
+}
+
+export function updateAllocationAcceptance(allocationId, status, token) {
+  return request(`/allocation/${allocationId}/acceptance`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  }, token);
+}
+
+export function resetAllocations(token) {
+  return request('/allocation/reset', {
+    method: 'POST',
+  }, token);
+}
+

@@ -52,15 +52,19 @@ export default function GovernmentLayout({ activePath, onNavigate, theme, onThem
               <span>{item.label}</span>
             </button>
           ))}
-        </nav>
 
-        <div className="sidebar-footer">
-          <button type="button" className="nav-item logout-item" onClick={logout}>
+          <button
+            type="button"
+            className="nav-item logout-item"
+            onClick={logout}
+            style={{ marginTop: '12px', borderTop: '1px solid var(--border)', paddingTop: '12px' }}
+          >
             <span className="nav-icon">⇠</span>
             <span>Logout</span>
           </button>
-        </div>
+        </nav>
       </aside>
+
 
       <div className="candidate-main-panel">
         <header className="candidate-header">

@@ -48,13 +48,34 @@ const allocationSchema = new mongoose.Schema(
             experience: {
                 type: Number,
                 default: 0
+            },
+
+            affirmative: {
+                type: Number,
+                default: 0
+            },
+
+            preference: {
+                type: Number,
+                default: 0
             }
+        },
+
+        reasonSummary: {
+            type: String,
+            default: ""
         },
 
         status: {
             type: String,
             enum: ["ALLOCATED", "WAITLIST"],
             required: true
+        },
+
+        acceptanceStatus: {
+            type: String,
+            enum: ["PENDING", "ACCEPTED", "DECLINED"],
+            default: "PENDING"
         }
     },
     {

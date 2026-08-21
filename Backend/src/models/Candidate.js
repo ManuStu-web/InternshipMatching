@@ -49,6 +49,47 @@ const candidateSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other", "Prefer not to say"],
+      default: "Prefer not to say",
+    },
+    socialCategory: {
+      type: String,
+      enum: ["General", "OBC", "SC", "ST", "EWS"],
+      default: "General",
+    },
+    district: {
+      type: String,
+      default: "",
+    },
+    state: {
+      type: String,
+      default: "",
+    },
+    areaType: {
+      type: String,
+      enum: ["Rural", "Semi-Urban", "Urban"],
+      default: "Urban",
+    },
+    isAspirationalDistrict: {
+      type: Boolean,
+      default: false,
+    },
+    pastBeneficiary: {
+      type: Boolean,
+      default: false,
+    },
+    firstGenerationLearner: {
+      type: Boolean,
+      default: false,
+    },
+    preferences: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Internship",
+      },
+    ],
     resumeUrl: {
       type: String,
       default: null,
