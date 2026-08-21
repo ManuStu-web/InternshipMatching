@@ -14,8 +14,8 @@ export default function AllocationsPage() {
       try {
         const resp = await getInternships();
         setInternships(resp?.internship || []);
-      } catch (err) {
-        setError(err.message || 'Failed to load internships');
+      } catch {
+        setError('Failed to load internships');
       } finally {
         setLoading(false);
       }
@@ -29,7 +29,7 @@ export default function AllocationsPage() {
     try {
       const resp = await getAllocationResults(internship._id);
       setAllocations(resp.allocations || []);
-    } catch (err) {
+    } catch {
       setAllocations([]);
     }
   };

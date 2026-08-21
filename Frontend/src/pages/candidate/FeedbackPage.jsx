@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getMyAllocations, submitFeedback, getCandidateProfile } from '../../services/api2';
+import { getMyAllocations, submitFeedback } from '../../services/api2';
 import { useAuth } from '../../context/AuthContext';
 
 export default function FeedbackPage() {

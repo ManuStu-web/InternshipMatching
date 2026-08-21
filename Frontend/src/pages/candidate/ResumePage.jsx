@@ -14,19 +14,27 @@ export default function ResumePage() {
   const [success, setSuccess] = useState('');
   const inputRef = useRef(null);
 
-  const loadProfile = async () => {
-    try {
-      const response = await getCandidateProfile();
-      setProfile(response.candidate || null);
-    } catch (loadError) {
-      setError(loadError.message || 'Unable to load resume status.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadProfile();
+    let isMounted = true;
+
+    const fetchProfile = async () => {
+      try {
+        const response = await getCandidateProfile();
+        if (!isMounted) return;
+        setProfile(response.candidate || null);
+      } catch (loadError) {
+        if (!isMounted) return;
+        setError(loadError.message || 'Unable to load resume status.');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchProfile();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleFileSelection = (file) => {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-export default function TagInput({ label, value = [], onChange, placeholder, helperText }) {
+export default function TagInput({ label, value = [], onChange, placeholder, helperText, suggestions = [] }) {
   const [draft, setDraft] = useState('');
 
   const normalizedValue = useMemo(() => value.filter(Boolean), [value]);
@@ -38,6 +38,15 @@ export default function TagInput({ label, value = [], onChange, placeholder, hel
     }
   };
 
+  const addSuggestedTag = (suggestion) => {
+    const safeSuggestion = suggestion.trim();
+    if (!safeSuggestion || normalizedValue.some((tag) => tag.toLowerCase() === safeSuggestion.toLowerCase())) {
+      return;
+    }
+
+    onChange([...normalizedValue, safeSuggestion]);
+  };
+
   return (
     <div className="field-group full-width">
       {label && <span>{label}</span>}
@@ -68,6 +77,21 @@ export default function TagInput({ label, value = [], onChange, placeholder, hel
           aria-label={label || placeholder}
         />
       </div>
+      {suggestions.length > 0 && (
+        <div className="tag-suggestions">
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion}
+              type="button"
+              className="tag-suggestion-button"
+              onClick={() => addSuggestedTag(suggestion)}
+              disabled={normalizedValue.some((tag) => tag.toLowerCase() === suggestion.toLowerCase())}
+            >
+              + {suggestion}
+            </button>
+          ))}
+        </div>
+      )}
       {helperText && <small className="tag-helper">{helperText}</small>}
     </div>
   );

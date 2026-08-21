@@ -4,7 +4,7 @@ function getStoredSession() {
   try {
     const raw = localStorage.getItem('sih25033-session');
     return raw ? JSON.parse(raw) : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

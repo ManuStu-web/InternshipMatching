@@ -11,6 +11,7 @@ const {
   updateMyProfile,
   uploadResume,
   getMyAllocations,
+  applyForInternship,
   getMyRecommendations,
   submitFeedback,
 } = require("../controllers/candidateController");
@@ -25,6 +26,7 @@ router.get("/me", authMiddleware, roleMiddleware("candidate"), getMyProfile);
 router.put("/me", authMiddleware, roleMiddleware("candidate"), updateMyProfile);
 router.post("/resume", authMiddleware, roleMiddleware("candidate"), upload.single("resume"), uploadResume);
 router.get("/me/allocations", authMiddleware, roleMiddleware("candidate"), getMyAllocations);
+router.post("/me/apply/:internshipId", authMiddleware, roleMiddleware("candidate"), applyForInternship);
 router.get("/me/recommendations", authMiddleware, roleMiddleware("candidate"), getMyRecommendations);
 router.post("/me/feedback", authMiddleware, roleMiddleware("candidate"), submitFeedback);
 

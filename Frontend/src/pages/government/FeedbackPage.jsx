@@ -6,7 +6,6 @@ export default function GovFeedbackPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedInternship, setSelectedInternship] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -50,7 +49,7 @@ export default function GovFeedbackPage() {
                 <strong>{f.internship?.title}</strong> — {f.rating}⭐
                 <div className="muted">{f.comment}</div>
                 <div className="muted">By: {f.candidate?.name}</div>
-                <button onClick={() => { setSelectedInternship(f.internship._id); loadForInternship(f.internship._id); }}>View internship stats</button>
+                <button onClick={() => loadForInternship(f.internship._id)}>View internship stats</button>
               </li>
             ))}
           </ul>

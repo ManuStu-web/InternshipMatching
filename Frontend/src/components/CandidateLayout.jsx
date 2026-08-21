@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
@@ -22,9 +22,10 @@ export default function CandidateLayout({ activePath, onNavigate, theme, onTheme
   const { session, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => {
+  const handleNavigate = (path) => {
     setMobileOpen(false);
-  }, [activePath]);
+    onNavigate(path);
+  };
 
   return (
     <div className="candidate-app-shell">
@@ -46,7 +47,7 @@ export default function CandidateLayout({ activePath, onNavigate, theme, onTheme
               key={item.path}
               type="button"
               className={`nav-item ${activePath === item.path ? 'active' : ''}`}
-              onClick={() => onNavigate(item.path)}
+              onClick={() => handleNavigate(item.path)}
             >
               <span className="nav-icon">{item.icon}</span>
               <span>{item.label}</span>

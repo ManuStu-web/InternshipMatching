@@ -7,7 +7,10 @@ const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
-const { calculateMatchScore } = require("../services/matchingService");
+const {
+  calculateMatchScore,
+  calculateEligibilityScore,
+} = require("../services/matchingService");
 
 //registration
 const registerCandidate = async (req, res) => {
@@ -149,6 +152,76 @@ const getMyAllocations = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Failed to fetch allocations",
+      error: error.message,
+    });
+  }
+};
+
+const applyForInternship = async (req, res) => {
+  try {
+    const { internshipId } = req.params;
+    const [candidate, internship] = await Promise.all([
+      Candidate.findById(req.user.id),
+      Internship.findById(internshipId),
+    ]);
+
+    if (!candidate) {
+      return res.status(404).json({ message: "Candidate profile not found" });
+    }
+
+    if (!internship) {
+      return res.status(404).json({ message: "Internship not found" });
+    }
+
+    const existingAllocation = await Allocation.findOne({
+      candidate: candidate._id,
+      internship: internship._id,
+    });
+
+    if (existingAllocation) {
+      return res.status(409).json({
+        message: "You have already applied for this internship",
+        allocation: existingAllocation,
+      });
+    }
+
+    if (calculateEligibilityScore(candidate, internship) !== 100) {
+      return res.status(400).json({
+        message: "You do not meet this internship's eligibility criteria",
+      });
+    }
+
+    const matchResult = calculateMatchScore(candidate, internship);
+    let status = "WAITLIST";
+
+    if (internship.status === "open" && internship.availableSeats > 0) {
+      const seatReserved = await Internship.updateOne(
+        { _id: internship._id, availableSeats: { $gt: 0 } },
+        { $inc: { availableSeats: -1 } },
+      );
+
+      if (seatReserved.modifiedCount === 1) {
+        status = "ALLOCATED";
+      }
+    }
+
+    const allocation = await Allocation.create({
+      candidate: candidate._id,
+      internship: internship._id,
+      score: matchResult.totalScore,
+      breakdown: matchResult.breakdown,
+      status,
+    });
+
+    res.status(201).json({
+      message: status === "ALLOCATED"
+        ? "Application submitted and allocation completed"
+        : "Application submitted and added to the waitlist",
+      allocation,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to submit application",
       error: error.message,
     });
   }
@@ -410,6 +483,7 @@ module.exports = {
   getCandidates,
   getMyProfile,
   getMyAllocations,
+  applyForInternship,
   getMyRecommendations,
   loginCandidate,
   updateMyProfile,

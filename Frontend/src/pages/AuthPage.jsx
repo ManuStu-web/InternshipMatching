@@ -20,11 +20,13 @@ const initialRegister = {
 };
 
 function Field({ id, label, type = 'text', value, onChange, placeholder, icon: Icon, required = true, error, suffix }) {
+  const IconComponent = Icon || UserIcon;
+
   return (
     <div className="field-wrap">
       <label htmlFor={id}>{label}</label>
       <div className={`field ${error ? 'field-error' : ''}`}>
-        <Icon size={18} strokeWidth={1.8} aria-hidden="true" />
+        <IconComponent size={18} strokeWidth={1.8} aria-hidden="true" />
         <input
           id={id}
           name={id}
